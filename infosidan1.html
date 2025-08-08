@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tunaskolan</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: white;
+      color: black;
+    }
+
+    .header {
+      text-align: center;
+      padding: 30px 20px 10px;
+    }
+
+    h1 { font-size: 4em; margin: 0; }
+
+    .main-content {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 20px;
+    }
+
+    .left {
+      flex: none;
+      width: 70%;
+      margin: 0 auto;
+    }
+
+    iframe {
+      width: 95%;
+      height: 68vh;
+      border: none;
+    }
+
+    .right {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(0,0,0,0.05);
+      padding: 10px 15px;
+      border-radius: 10px;
+      text-align: right;
+      z-index: 999;
+    }
+
+    #date { font-size: 1.2em; margin-bottom: 5px; }
+    #clock { font-size: 2em; font-weight: bold; }
+
+    .ticker {
+      background: #222;
+      color: white;
+      font-size: 1.5em;
+      padding: 10px;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      z-index: 998;
+    }
+
+    @media (max-width: 800px) {
+      .main-content {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .left {
+        width: 100%;
+      }
+
+      iframe {
+        height: 60vh;
+      }
+
+      .right {
+        position: static;
+        margin: 10px auto;
+        text-align: center;
+      }
+
+      .ticker { font-size: 1.2em; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>Välkommen till Tunaskolan!</h1>
+  </div>
+
+  <div class="right">
+    <div id="date"></div>
+    <div id="clock"></div>
+  </div>
+
+  <div class="main-content">
+    <div class="left">
+      <iframe 
+        src="https://docs.google.com/presentation/d/e/2PACX-1vQ5zBqPLQcl5d9WFkEVvSvvKXVGfnFHBkvHx-pC2C6VTfdRcBJc-P5IjcYaSXheb3m90nG5-GtpwZ6A/pubembed?start=true&loop=true&delayms=5000" 
+        allowfullscreen>
+      </iframe>
+    </div>
+  </div>
+
+  <div class="ticker">
+    <marquee id="newsMarquee">Laddar nyheter...</marquee>
+  </div>
+
+  <script>
+    function updateClock() {
+      const now = new Date();
+      const time = now.toLocaleTimeString('sv-SE', {
+        hour: '2-digit', minute: '2-digit', second: '2-digit'
+      });
+      const date = now.toLocaleDateString('sv-SE', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+      });
+      document.getElementById('clock').textContent = time;
+      document.getElementById('date').textContent = date.charAt(0).toUpperCase() + date.slice(1);
+    }
+
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    async function loadNews() {
+      try {
+        const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRhC2aUmsZMLo0PFpF1CKaC_NIvuIf_qSwo94MAuWBdgrTURLlzfMeMV5sMjtbS6_FILFYN2h0WND2B/pub?output=csv';
+        const response = await fetch(sheetUrl);
+        const data = await response.text();
+        const rows = data.split('\n').map(r => r.trim()).filter(Boolean);
+        document.getElementById('newsMarquee').textContent = rows.join(' | ');
+      } catch (e) {
+        document.getElementById('newsMarquee').textContent = 'Tunaskolan är en svensk grundskola i stadsdelen Tuna i Lunds kommun. Den uppfördes 1961-67. På Tunaskolan har ett flertal kända personer studerat, som Måns Zelmerlöw, Jason Diakité, Kattis Ahlström, Olof Lundh, Henrik Johnsson samt Adde Malmberg.';
+      }
+    }
+
+    loadNews();
+    setInterval(loadNews, 300000);
+  </script>
+
+</body>
+</html>
